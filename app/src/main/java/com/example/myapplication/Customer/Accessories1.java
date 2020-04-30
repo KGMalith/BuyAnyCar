@@ -32,7 +32,7 @@ public class Accessories1 extends AppCompatActivity implements NavigationView.On
     NavigationView navigationView;
     Toolbar toolbar;
     ImageView imageView;
-    Button buyButton;
+    Button accessoriesButton;
     TextView aTitle,aBrand,aModel,aCondition,aPrice,aDescription;
     DatabaseReference ref;
     FirebaseAuth mAuth;
@@ -52,7 +52,7 @@ public class Accessories1 extends AppCompatActivity implements NavigationView.On
         aCondition = findViewById(R.id.accessories_condition_label);
         aPrice = findViewById(R.id.accessories_price_label);
         aDescription = findViewById(R.id.accessories_textView_Desc);
-        buyButton = findViewById(R.id.accessoriesBuy);
+        accessoriesButton = findViewById(R.id.accessoriesBuy);
         ref = FirebaseDatabase.getInstance().getReference().child("Add Accessories");
         mAuth = FirebaseAuth.getInstance();
 
