@@ -3,8 +3,10 @@ package com.example.myapplication.Customer;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,6 +19,8 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.example.myapplication.LoginRegister.Login;
 import com.example.myapplication.R;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -25,6 +29,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
+
+import java.util.HashMap;
 
 public class ViewRentCar extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -36,7 +42,7 @@ public class ViewRentCar extends AppCompatActivity implements NavigationView.OnN
     Button rentButton;
     DatabaseReference ref;
     FirebaseAuth mAuth;
-
+    ProgressBar progressBar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,8 +67,9 @@ public class ViewRentCar extends AppCompatActivity implements NavigationView.OnN
         rentButton = findViewById(R.id.rentCarButton);
         ref = FirebaseDatabase.getInstance().getReference().child("Add Rent Cars");
         mAuth = FirebaseAuth.getInstance();
+        progressBar = findViewById(R.id.ProgressBarRentCar);
 
-        String CarKey = getIntent().getStringExtra("CarKey");
+        final String CarKey = getIntent().getStringExtra("CarKey");
         ref.child(CarKey).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -122,6 +129,62 @@ public class ViewRentCar extends AppCompatActivity implements NavigationView.OnN
         toggle.syncState();
 
         navigationView.setNavigationItemSelectedListener(this);
+
+        rentButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                progressBar.setVisibility(View.VISIBLE);
+                ref.child(CarKey).addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if(dataSnapshot.exists()){
+
+                            String RentCarBrand = dataSnapshot.child("RentCarBrand").getValue().toString();
+                            String RentCarDescription = dataSnapshot.child("RentCarDescription").getValue().toString();
+                            String RentModel = dataSnapshot.child("RentCarModel").getValue().toString();
+                            String RentalPrice = dataSnapshot.child("RentCarPrice").getValue().toString();
+                            String RentTitle = dataSnapshot.child("RentCarTopic").getValue().toString();
+                            String RentImage = dataSnapshot.child("ImageURL").getValue().toString();
+
+
+                            String uid = mAuth.getCurrentUser().getUid();
+                            ref = FirebaseDatabase.getInstance().getReference().child("Buy Details").child(uid).child(CarKey);
+
+                            HashMap<String,String> hashMap = new HashMap<>();
+                            hashMap.put("Topic",RentTitle);
+                            hashMap.put("Brand",RentCarBrand);
+                            hashMap.put("Model",RentModel);
+                            hashMap.put("Description",RentCarDescription);
+                            hashMap.put("Price",RentalPrice);
+                            hashMap.put("ImageURL",RentImage);
+
+                            ref.setValue(hashMap).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if(task.isSuccessful()){
+                                        Toast.makeText(ViewRentCar.this,"You Purchased Rent Car Successfully",Toast.LENGTH_SHORT).show();
+                                        startActivity(new Intent(getApplicationContext(), Dashboard.class));
+                                        progressBar.setVisibility(View.GONE);
+                                        finish();
+
+                                    }
+                                    else{
+                                        Toast.makeText(ViewRentCar.this,"Error !" + task.getException().getMessage(),Toast.LENGTH_SHORT).show();
+                                        progressBar.setVisibility(View.GONE);
+                                    }
+                                }
+                            });
+
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+            }
+        });
     }
 
     @Override
