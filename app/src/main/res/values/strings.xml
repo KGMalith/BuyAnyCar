@@ -13,4 +13,5 @@
     <string name="NewCar">New Car</string>
     <string name="UsedCar">Used Car</string>
     <string name="MercedesBenz">Mercedes Benz S300 AMG LWB 2014</string>
+    <string name="TotalRentCars">Total Rent Cars</string>
 </resources>
