@@ -137,7 +137,7 @@
                         android:layout_below="@id/total_rent_label"
                         android:layout_centerHorizontal="true"
                         android:includeFontPadding="false"
-                        android:text="Total Rent Cars"
+                        android:text="@string/TotalRentCars"
                         android:textSize="15sp" />
                 </RelativeLayout>
 
